@@ -28,6 +28,8 @@
 # environments, you might want to look into +PR_SET_PDEATHSIG+.
 # 
 class Chill
+  VERSION = '1.0.0'
+
   ##
   # The PID of the spawned subprocess.
   #
