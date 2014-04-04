@@ -28,7 +28,7 @@
 # environments, you might want to look into +PR_SET_PDEATHSIG+.
 # 
 class Chill
-  VERSION = '1.0.0'
+  VERSION = '1.0.1'
 
   ##
   # The PID of the spawned subprocess.
@@ -120,6 +120,9 @@ class Chill
       @reader.close
 
       Process.kill(@signal, @pid) if val.nil?
+
+      # Don't run any at_exit functions; the parent process will take care of all that.
+      Kernel.exit!
     end
   end
 end
