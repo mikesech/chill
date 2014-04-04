@@ -86,7 +86,16 @@
   </div>
 
   <div id="project-metadata">
-    
+    <nav id="fileindex-section" class="section project-section">
+  <h3 class="section-header">Pages</h3>
+
+  <ul>
+  
+    <li class="file"><a href="./LICENSE.html">LICENSE</a>
+  
+  </ul>
+</nav>
+
     <nav id="classindex-section" class="section project-section">
   <h3 class="section-header">Class and Module Index</h3>
 
@@ -107,7 +116,7 @@
     
 <p>Starts a subprocess that dies when its parent does.</p>
 
-<p>The <a href="Chill.html">Chill</a> module provides a way to fork or spawn a
+<p>The <a href="Chill.html">Chill</a> class provides a way to fork or spawn a
 subprocess that will die when its parent does. It accomplishes this by also
 spawning a watchdog process. The watchdog and the parent are connected by
 an anonymous pipe; when the pipe is broken (because the parent dies), the
@@ -142,6 +151,19 @@ environments, you might want to look into <code>PR_SET_PDEATHSIG</code>.</p>
 
     
 
+    
+    <!-- Constants -->
+    <section id="constants-list" class="section">
+      <h3 class="section-header">Constants</h3>
+      <dl>
+      
+        <dt id="VERSION">VERSION
+        
+        <dd class="description">
+        
+      
+      </dl>
+    </section>
     
 
     
@@ -191,7 +213,7 @@ child process can be accessed through its <code>pid</code> method.</p>
 
           
           <div class="method-source-code" id="fork-source">
-            <pre><span class="ruby-comment"># File lib/chill.rb, line 91</span>
+            <pre><span class="ruby-comment"># File lib/chill.rb, line 93</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">fork</span>(&amp;<span class="ruby-identifier">block</span>); <span class="ruby-identifier">x</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">new</span>; <span class="ruby-identifier">x</span>.<span class="ruby-identifier">fork</span>(&amp;<span class="ruby-identifier">block</span>); <span class="ruby-identifier">x</span>; <span class="ruby-keyword">end</span></pre>
           </div><!-- fork-source -->
           
@@ -227,7 +249,7 @@ parent dies.</p>
 
           
           <div class="method-source-code" id="new-source">
-            <pre><span class="ruby-comment"># File lib/chill.rb, line 46</span>
+            <pre><span class="ruby-comment"># File lib/chill.rb, line 48</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">signal</span> = <span class="ruby-string">&quot;TERM&quot;</span>)
   <span class="ruby-ivar">@reader</span>, <span class="ruby-ivar">@writer</span> = <span class="ruby-constant">IO</span>.<span class="ruby-identifier">pipe</span>
   <span class="ruby-ivar">@signal</span> = <span class="ruby-identifier">signal</span>
@@ -262,7 +284,7 @@ child process can be accessed through its <code>pid</code> method.</p>
 
           
           <div class="method-source-code" id="spawn-source">
-            <pre><span class="ruby-comment"># File lib/chill.rb, line 99</span>
+            <pre><span class="ruby-comment"># File lib/chill.rb, line 101</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">spawn</span>(*<span class="ruby-identifier">args</span>); <span class="ruby-identifier">x</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">new</span>; <span class="ruby-identifier">x</span>.<span class="ruby-identifier">spawn</span>(*<span class="ruby-identifier">args</span>); <span class="ruby-identifier">x</span>; <span class="ruby-keyword">end</span></pre>
           </div><!-- spawn-source -->
           
@@ -298,7 +320,7 @@ child process can be accessed through its <code>pid</code> method.</p>
 
           
           <div class="method-source-code" id="fork-source">
-            <pre><span class="ruby-comment"># File lib/chill.rb, line 56</span>
+            <pre><span class="ruby-comment"># File lib/chill.rb, line 58</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">fork</span>(&amp;<span class="ruby-identifier">block</span>)
   <span class="ruby-identifier">raise</span> <span class="ruby-constant">RuntimeError</span>, <span class="ruby-string">&quot;already in use&quot;</span> <span class="ruby-keyword">unless</span> <span class="ruby-ivar">@pid</span>.<span class="ruby-identifier">nil?</span>
   <span class="ruby-ivar">@pid</span> = <span class="ruby-constant">Process</span>.<span class="ruby-identifier">fork</span> <span class="ruby-keyword">do</span>
@@ -345,7 +367,7 @@ accepted.</p>
 
           
           <div class="method-source-code" id="spawn-source">
-            <pre><span class="ruby-comment"># File lib/chill.rb, line 79</span>
+            <pre><span class="ruby-comment"># File lib/chill.rb, line 81</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">spawn</span>(*<span class="ruby-identifier">args</span>)
   <span class="ruby-identifier">fork</span> <span class="ruby-keyword">do</span>
     <span class="ruby-constant">Process</span>.<span class="ruby-identifier">exec</span>(*<span class="ruby-identifier">args</span>)
