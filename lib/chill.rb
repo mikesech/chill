@@ -76,11 +76,30 @@ class Chill
   # Spawns a new process.
   # See <tt>Kernel::exec</tt> for the arguments accepted.
   # 
+  # *Note* that, unlike <tt>Kernel::spawn</tt>, this method will not
+  # raise an exception if it fails to properly +exec+ the new
+  # program. Instead, the child process will print an error
+  # message and immediately quit.
+  # 
   # Returns the PID of the child process.
   # 
   def spawn(*args)
     fork do
-      Process.exec(*args)
+      begin
+        Process.exec(*args)
+      rescue Exception => e
+        # If we failed to exec, this process needs to exit immediately
+        # without triggering any normal cleanup. Otherwise, we'd end up
+        # stepping on the parent process' toes.
+        # We'll end up quitting before the runtime could handle the exception,
+        # so we have to output the error message manually. This matches the
+        # runtime's output format.
+        # We write directly to stderr to bypass any buffers, which won't be
+        # flushed when we call +exit!+.
+        backtrace = e.backtrace.nil? || e.backtrace.empty? ? [""] : e.backtrace
+        $stderr.write "#{backtrace[0]}: #{e} (#{e.class.name})\n" + backtrace[1..-1].inject(""){|m,x|"#{m}\tfrom #{x}\n"}
+        Kernel.exit!
+      end
     end
   end
 
@@ -94,6 +113,11 @@ class Chill
   ##
   # Spawns a new process.
   # See <tt>Kernel::exec</tt> for the arguments accepted.
+  # 
+  # *Note* that, unlike <tt>Kernel::spawn</tt>, this method will not
+  # raise an exception if it fails to properly +exec+ the new
+  # program. Instead, the child process will print an error
+  # message and immediately quit.
   # 
   # Returns the Chill instance created. The PID of the child process
   # can be accessed through its +pid+ method.

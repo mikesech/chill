@@ -213,7 +213,7 @@ child process can be accessed through its <code>pid</code> method.</p>
 
           
           <div class="method-source-code" id="fork-source">
-            <pre><span class="ruby-comment"># File lib/chill.rb, line 93</span>
+            <pre><span class="ruby-comment"># File lib/chill.rb, line 112</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">fork</span>(&amp;<span class="ruby-identifier">block</span>); <span class="ruby-identifier">x</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">new</span>; <span class="ruby-identifier">x</span>.<span class="ruby-identifier">fork</span>(&amp;<span class="ruby-identifier">block</span>); <span class="ruby-identifier">x</span>; <span class="ruby-keyword">end</span></pre>
           </div><!-- fork-source -->
           
@@ -278,13 +278,18 @@ parent dies.</p>
           <p>Spawns a new process. See <code>Kernel::exec</code> for the arguments
 accepted.</p>
 
+<p><strong>Note</strong> that, unlike <code>Kernel::spawn</code>, this method
+will not raise an exception if it fails to properly <code>exec</code> the
+new program. Instead, the child process will print an error message and
+immediately quit.</p>
+
 <p>Returns the <a href="Chill.html">Chill</a> instance created. The PID of the
 child process can be accessed through its <code>pid</code> method.</p>
           
 
           
           <div class="method-source-code" id="spawn-source">
-            <pre><span class="ruby-comment"># File lib/chill.rb, line 101</span>
+            <pre><span class="ruby-comment"># File lib/chill.rb, line 125</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">spawn</span>(*<span class="ruby-identifier">args</span>); <span class="ruby-identifier">x</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">new</span>; <span class="ruby-identifier">x</span>.<span class="ruby-identifier">spawn</span>(*<span class="ruby-identifier">args</span>); <span class="ruby-identifier">x</span>; <span class="ruby-keyword">end</span></pre>
           </div><!-- spawn-source -->
           
@@ -362,15 +367,34 @@ child process can be accessed through its <code>pid</code> method.</p>
           <p>Spawns a new process. See <code>Kernel::exec</code> for the arguments
 accepted.</p>
 
+<p><strong>Note</strong> that, unlike <code>Kernel::spawn</code>, this method
+will not raise an exception if it fails to properly <code>exec</code> the
+new program. Instead, the child process will print an error message and
+immediately quit.</p>
+
 <p>Returns the PID of the child process.</p>
           
 
           
           <div class="method-source-code" id="spawn-source">
-            <pre><span class="ruby-comment"># File lib/chill.rb, line 81</span>
+            <pre><span class="ruby-comment"># File lib/chill.rb, line 86</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">spawn</span>(*<span class="ruby-identifier">args</span>)
   <span class="ruby-identifier">fork</span> <span class="ruby-keyword">do</span>
-    <span class="ruby-constant">Process</span>.<span class="ruby-identifier">exec</span>(*<span class="ruby-identifier">args</span>)
+    <span class="ruby-keyword">begin</span>
+      <span class="ruby-constant">Process</span>.<span class="ruby-identifier">exec</span>(*<span class="ruby-identifier">args</span>)
+    <span class="ruby-keyword">rescue</span> <span class="ruby-constant">Exception</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">e</span>
+      <span class="ruby-comment"># If we failed to exec, this process needs to exit immediately</span>
+      <span class="ruby-comment"># without triggering any normal cleanup. Otherwise, we'd end up</span>
+      <span class="ruby-comment"># stepping on the parent process' toes.</span>
+      <span class="ruby-comment"># We'll end up quitting before the runtime could handle the exception,</span>
+      <span class="ruby-comment"># so we have to output the error message manually. This matches the</span>
+      <span class="ruby-comment"># runtime's output format.</span>
+      <span class="ruby-comment"># We write directly to stderr to bypass any buffers, which won't be</span>
+      <span class="ruby-comment"># flushed when we call +exit!+.</span>
+      <span class="ruby-identifier">backtrace</span> = <span class="ruby-identifier">e</span>.<span class="ruby-identifier">backtrace</span>.<span class="ruby-identifier">nil?</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">e</span>.<span class="ruby-identifier">backtrace</span>.<span class="ruby-identifier">empty?</span> <span class="ruby-operator">?</span> [<span class="ruby-string">&quot;&quot;</span>] <span class="ruby-operator">:</span> <span class="ruby-identifier">e</span>.<span class="ruby-identifier">backtrace</span>
+      <span class="ruby-identifier">$stderr</span>.<span class="ruby-identifier">write</span> <span class="ruby-node">&quot;#{backtrace[0]}: #{e} (#{e.class.name})\n&quot;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">backtrace</span>[<span class="ruby-value">1</span><span class="ruby-operator">..</span><span class="ruby-value">-1</span>].<span class="ruby-identifier">inject</span>(<span class="ruby-string">&quot;&quot;</span>){<span class="ruby-operator">|</span><span class="ruby-identifier">m</span>,<span class="ruby-identifier">x</span><span class="ruby-operator">|</span><span class="ruby-node">&quot;#{m}\tfrom #{x}\n&quot;</span>}
+      <span class="ruby-constant">Kernel</span>.<span class="ruby-identifier">exit!</span>
+    <span class="ruby-keyword">end</span>
   <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
           </div><!-- spawn-source -->
